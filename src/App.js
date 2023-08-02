@@ -1,63 +1,124 @@
-// Importiere notwendige Funktionen von React
-import React, { useState } from 'react';
+// Hier importieren wir notwendige Module und Funktionen
+import React, { useState } from "react";  // useState wird benötigt, um den Status unserer App zu verwalten
+import Checkbox from "@mui/material/Checkbox";  // Checkbox-UI von Material-UI
+import IconButton from "@mui/material/IconButton";  // Icon Button-UI von Material-UI
+import DeleteIcon from "@mui/icons-material/Delete";  // Lösch-Icon von Material-UI
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";  // Hinzufüge-Icon von Material-UI
+import TextField from "@mui/material/TextField";  // Textfeld-UI von Material-UI
+import Button from "@mui/material/Button";  // Button UI von Material-UI
+import styled from "@emotion/styled";  // Für emotion-styled Komponenten
+import { v4 as uuidv4 } from 'uuid';  // Für einzigartige IDs
 
-// Definiere die Aufgaben-Komponente
-function Aufgaben() {
-  
-  // useState wird für die Verwaltung des Zustands in funktionalen Komponenten verwendet.
-  // Hier wird der Zustand für die Aufgabenliste und die neue Aufgabe definiert.
+// Hier definieren wir einige gestaltete Komponenten mit emotion-styled
+const AufgabenWrapper = styled.div`
+  background-color: #f5f5f5;
+  padding: 1em;
+  border-radius: 10px;
+  text-align: center;
+`;  // Der äußere Wrapper der Aufgaben
+
+const Aufgabe = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 1em 0;
+`;  // Einzelne Aufgaben-Container
+
+const AufgabeText = styled.span`
+  text-decoration: ${(props) => (props.done ? "line-through" : "none")};
+`;  // Text einer Aufgabe, wird durchgestrichen, wenn erledigt
+
+// Hauptfunktion der Aufgaben-App
+function AufgabenApp() {
+  // useState wird verwendet, um den Zustand der Aufgaben zu verwalten
   const [aufgaben, setAufgaben] = useState([
-    { text: 'Hausaufgaben machen', done: false },
-    { text: 'Einkaufen gehen', done: false },
-    { text: 'Bericht schreiben', done: false },
-    { text: 'Freunde treffen', done: false },
-    { text: 'Ein Buch lesen', done: false },
+    { id: uuidv4(), text: "Hausaufgaben machen", done: false },
+    { id: uuidv4(), text: "Einkaufen gehen", done: false },
+    { id: uuidv4(), text: "Bericht schreiben", done: false },
+    { id: uuidv4(), text: "Freunde treffen", done: false },
+    { id: uuidv4(), text: "Ein Buch lesen", done: false },
   ]);
 
-  const [neueAufgabe, setNeueAufgabe] = useState('');
+  // useState wird verwendet, um den Zustand der neuen Aufgabe zu verwalten
+  const [neueAufgabe, setNeueAufgabe] = useState("");
 
-  // Funktion zum Hinzufügen einer neuen Aufgabe
+  // Funktion zum Hinzufügen einer neuen Aufgabe zur Liste
   const addAufgabe = () => {
-    setAufgaben([...aufgaben, { text: neueAufgabe, done: false }]);
-    setNeueAufgabe('');  // Setze das Eingabefeld zurück
+    // Wenn das Textfeld leer ist, sollte nichts hinzugefügt werden
+    if (neueAufgabe === "") return;
+    setAufgaben([
+      ...aufgaben,
+      { id: uuidv4(), text: neueAufgabe, done: false },
+    ]);
+    // Setzt das Textfeld zurück auf leer, nachdem eine Aufgabe hinzugefügt wurde
+    setNeueAufgabe("");
   };
 
-  // Funktion zum Wechseln des "erledigt"-Status einer Aufgabe
-  const toggleDone = (index) => {
-    const updatedAufgaben = aufgaben.map((aufgabe, aufgabeIndex) =>
-      aufgabeIndex === index ? { ...aufgabe, done: !aufgabe.done } : aufgabe
+  // Funktion zum Umschalten des "done"-Status einer Aufgabe
+  const toggleDone = (id) => {
+    const updatedAufgaben = aufgaben.map((aufgabe) =>
+      // Wenn die ID der Aufgabe mit der übergebenen ID übereinstimmt, wechselt der Status
+      aufgabe.id === id ? { ...aufgabe, done: !aufgabe.done } : aufgabe
     );
+    // Aktualisiere den Zustand der Aufgaben
     setAufgaben(updatedAufgaben);
   };
 
-  // Rendern der Komponente
+  // Funktion zum Löschen einer Aufgabe aus der Liste
+  const deleteAufgabe = (id) => {
+    const updatedAufgaben = aufgaben.filter((aufgabe) => aufgabe.id !== id);
+    // Aktualisiere den Zustand der Aufgaben
+    setAufgaben(updatedAufgaben);
+  };
+// Funktion zum Löschen aller Aufgaben
+  const deleteAllAufgaben = () => {
+    setAufgaben([]);
+  };
+
+  // Was unsere Komponente zurückgibt, wird auf der Seite gerendert
   return (
-    <div>
-      <h1>Aufgabenliste</h1>
-      {/* Iteriere über die Aufgabenliste und erstelle für jede Aufgabe ein checkbox-input und ein span-Element */}
-      {aufgaben.map((aufgabe, index) => (
-        <div key={index}>
-          {/* Wenn die Checkbox angeklickt wird, ändert sich der "erledigt"-Status der Aufgabe */}
-          <input
-            type="checkbox"
+    <AufgabenWrapper>
+      {/* Überschrift */}
+      <h1>My Genious Tasks</h1>
+
+      {/* Alle Aufgaben werden durchlaufen und für jede Aufgabe wird eine Checkbox, ein Text und ein Lösch-Button erzeugt */}
+      {aufgaben.map((aufgabe) => (
+        <Aufgabe key={aufgabe.id}>
+          {/* Checkbox für den Erledigt-Status */}
+          <Checkbox
             checked={aufgabe.done}
-            onChange={() => toggleDone(index)}
+            onChange={() => toggleDone(aufgabe.id)}
           />
-          {/* Der Aufgabentext wird angezeigt */}
-          <span>{aufgabe.text}</span>
-        </div>
+
+          {/* Text der Aufgabe */}
+          <AufgabeText done={aufgabe.done}>{aufgabe.text}</AufgabeText>
+          <IconButton style={{ marginLeft: 'auto' }} onClick={() => deleteAufgabe(aufgabe.id)}></IconButton>
+
+          {/* Lösch-Button */}
+          <IconButton onClick={() => deleteAufgabe(aufgabe.id)}>
+            <DeleteIcon />
+          </IconButton>
+        </Aufgabe>
       ))}
-      {/* Eingabefeld für eine neue Aufgabe */}
-      <input
+
+      {/* Texteingabefeld für neue Aufgaben */}
+      <TextField
+        variant="outlined"
         value={neueAufgabe}
         onChange={(e) => setNeueAufgabe(e.target.value)}
         placeholder="Neue Aufgabe hinzufügen..."
       />
-      {/* Button zum Hinzufügen der neuen Aufgabe */}
-      <button onClick={addAufgabe}>Hinzufügen</button>
-    </div>
+
+      {/* Button zum Hinzufügen einer neuen Aufgabe */}
+      <IconButton onClick={addAufgabe}>
+        <AddCircleOutlineIcon />
+        </IconButton>
+        <Button variant="contained" color="secondary" onClick={deleteAllAufgaben}>
+        Alle Aufgaben löschen
+      </Button>
+    </AufgabenWrapper>
   );
 }
 
-// Exportiere die Aufgaben-Komponente, damit sie in anderen Teilen der Anwendung verwendet werden kann.
-export default Aufgaben;
+// Exportieren der AufgabenApp-Komponente für die Verwendung in anderen Dateien
+export default AufgabenApp;
